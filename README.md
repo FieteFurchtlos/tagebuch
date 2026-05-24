@@ -16,7 +16,7 @@ Aktuell steht das **Grundgerüst**:
 - Floating-Action-Button für neuen Eintrag
 
 **Noch nicht aktiv** (kommt schrittweise nach deiner Freigabe):
-PIN-Sperre · Eintragen mit Auto-Save · Google-Spracherkennung · Fotos · Suche · Kalenderlogik · Export.
+PIN-Sperre · Eintragen mit Auto-Save · Google-Spracherkennung · Fotos · Suche · Kalenderlogik · Export. 
 
 ---
 
