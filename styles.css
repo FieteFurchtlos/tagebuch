@@ -1,0 +1,213 @@
+/* ===========================================================
+   Mein Tagebuch — minimalistisches Design
+   =========================================================== */
+
+:root {
+  /* Neutrale Palette */
+  --bg:          #FAFAF9;   /* Hintergrund, sehr helles Off-White */
+  --surface:     #FFFFFF;   /* Karten, Eingabefelder */
+  --border:      #E7E5E4;   /* dezente Trennlinien */
+  --border-soft: #F1EFED;   /* sehr feine Trenner */
+  --text:        #18181B;   /* Haupttext, fast schwarz */
+  --text-soft:   #52525B;   /* Sekundärtext */
+  --text-mute:   #A1A1AA;   /* Hinweistext */
+  --accent:      #18181B;   /* Akzent = Haupttext (puristisch) */
+  --accent-soft: #3F3F46;   /* Hover/Active-Variante */
+  --danger:      #B91C1C;   /* dezentes Rot, nur für Löschen */
+
+  --radius:    10px;
+  --radius-sm: 6px;
+
+  --nav-height: 60px;
+
+  --font: 'Aptos', 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 16px;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior-y: contain;
+}
+
+#app {
+  min-height: 100%;
+  padding-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom));
+}
+
+/* ---------- Kopfzeile ---------- */
+header.top {
+  padding: 22px 22px 14px;
+  padding-top: calc(22px + env(safe-area-inset-top));
+}
+header.top h1 {
+  margin: 0;
+  font-weight: 600;
+  font-size: 22px;
+  letter-spacing: -0.2px;
+  color: var(--text);
+}
+header.top .subtitle {
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--text-mute);
+  font-weight: 400;
+}
+
+/* ---------- Views ---------- */
+.view {
+  display: none;
+  padding: 4px 22px 24px;
+}
+.view.active { display: block; }
+
+/* ---------- Karten / Listen-Items ---------- */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  margin-bottom: 10px;
+}
+.card h2 {
+  margin: 0 0 4px;
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--text);
+}
+.card .date {
+  font-size: 12px;
+  color: var(--text-mute);
+  font-weight: 500;
+}
+.card p {
+  margin: 8px 0 0;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--text-soft);
+}
+
+/* ---------- Platzhalter ---------- */
+.placeholder {
+  text-align: center;
+  padding: 80px 24px;
+  color: var(--text-mute);
+  font-size: 15px;
+  line-height: 1.6;
+}
+.placeholder .icon {
+  display: inline-flex;
+  margin-bottom: 16px;
+  color: var(--text-mute);
+}
+.placeholder .icon svg {
+  width: 36px;
+  height: 36px;
+  stroke-width: 1.25;
+}
+
+/* ---------- Floating Action Button (Neuer Eintrag) ---------- */
+.fab {
+  position: fixed;
+  right: 20px;
+  bottom: calc(var(--nav-height) + 18px + env(safe-area-inset-bottom));
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 5;
+  transition: background 0.15s ease, transform 0.15s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+.fab:active { transform: scale(0.96); background: var(--accent-soft); }
+.fab svg { width: 22px; height: 22px; stroke-width: 1.75; }
+
+/* ---------- Untere Navigation ---------- */
+nav.bottom {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: calc(var(--nav-height) + env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-around;
+  align-items: stretch;
+  z-index: 4;
+}
+nav.bottom button {
+  flex: 1;
+  background: none;
+  border: none;
+  color: var(--text-mute);
+  font-family: var(--font);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 8px 4px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transition: color 0.15s ease;
+}
+nav.bottom button svg {
+  width: 22px;
+  height: 22px;
+  stroke-width: 1.5;
+}
+nav.bottom button.active {
+  color: var(--text);
+}
+nav.bottom button.active svg {
+  stroke-width: 1.75;
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 11px 18px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.btn:active { background: var(--accent-soft); }
+.btn.secondary {
+  background: transparent;
+  color: var(--text-soft);
+  border: 1px solid var(--border);
+}
+
+/* ---------- Hinweis-Banner (für Skelett) ---------- */
+.banner {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin: 4px 0 18px;
+  font-size: 13px;
+  color: var(--text-soft);
+  line-height: 1.55;
+}
+.banner strong { color: var(--text); font-weight: 600; }

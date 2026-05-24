@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#FAFAF9" />
+  <meta name="description" content="Mein persönliches Tagebuch — lokal auf dem Gerät." />
+  <title>Mein Tagebuch</title>
+
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app">
+    <header class="top">
+      <h1>Mein Tagebuch</h1>
+      <div class="subtitle" id="today-date"></div>
+    </header>
+
+    <!-- ============= Ansicht: Liste ============= -->
+    <section id="view-list" class="view">
+      <div class="banner">
+        <strong>Phase 1 — Grundgerüst läuft.</strong><br />
+        Die App ist installierbar und funktioniert offline. Eintragen,
+        Diktat, Fotos und Sperre kommen Schritt für Schritt.
+      </div>
+
+      <div class="placeholder">
+        <span class="icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 5h16v14H4z"/>
+            <path d="M12 5v14"/>
+            <path d="M7 9h2M7 12h2M15 9h2M15 12h2"/>
+          </svg>
+        </span>
+        Noch keine Einträge.<br />
+        Tippe unten rechts auf das Plus, um zu beginnen.
+      </div>
+    </section>
+
+    <!-- ============= Ansicht: Kalender ============= -->
+    <section id="view-calendar" class="view">
+      <div class="placeholder">
+        <span class="icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="5" width="18" height="16" rx="1"/>
+            <path d="M3 9h18"/>
+            <path d="M8 3v4M16 3v4"/>
+          </svg>
+        </span>
+        Monatsübersicht<br />
+        kommt im nächsten Schritt.
+      </div>
+    </section>
+
+    <!-- ============= Ansicht: Suche ============= -->
+    <section id="view-search" class="view">
+      <div class="placeholder">
+        <span class="icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="7"/>
+            <path d="m20 20-3.5-3.5"/>
+          </svg>
+        </span>
+        Volltextsuche<br />
+        wird gleich ergänzt.
+      </div>
+    </section>
+
+    <!-- ============= Ansicht: Einstellungen ============= -->
+    <section id="view-settings" class="view">
+      <div class="placeholder">
+        <span class="icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h0a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5h0a1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v0a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>
+          </svg>
+        </span>
+        PIN, Export und Einstellungen<br />
+        folgen in den nächsten Schritten.
+      </div>
+    </section>
+
+    <!-- Floating Button: Neuer Eintrag -->
+    <button id="fab-new" class="fab" aria-label="Neuer Eintrag">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round">
+        <path d="M12 5v14M5 12h14"/>
+      </svg>
+    </button>
+
+    <!-- Untere Navigation -->
+    <nav class="bottom" aria-label="Hauptnavigation">
+      <button data-target="list" class="active" aria-label="Einträge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 5h16v14H4z"/>
+          <path d="M12 5v14"/>
+        </svg>
+        Einträge
+      </button>
+      <button data-target="calendar" aria-label="Kalender">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="5" width="18" height="16" rx="1"/>
+          <path d="M3 9h18"/>
+          <path d="M8 3v4M16 3v4"/>
+        </svg>
+        Kalender
+      </button>
+      <button data-target="search" aria-label="Suche">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="7"/>
+          <path d="m20 20-3.5-3.5"/>
+        </svg>
+        Suche
+      </button>
+      <button data-target="settings" aria-label="Mehr">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="5" cy="12" r="1.2"/>
+          <circle cx="12" cy="12" r="1.2"/>
+          <circle cx="19" cy="12" r="1.2"/>
+        </svg>
+        Mehr
+      </button>
+    </nav>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
