@@ -22,13 +22,7 @@
 
     <!-- ============= Ansicht: Liste ============= -->
     <section id="view-list" class="view">
-      <div class="banner">
-        <strong>Phase 1 — Grundgerüst läuft.</strong><br />
-        Die App ist installierbar und funktioniert offline. Eintragen,
-        Diktat, Fotos und Sperre kommen Schritt für Schritt.
-      </div>
-
-      <div class="placeholder">
+      <div id="entries-placeholder" class="placeholder">
         <span class="icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
             <path d="M4 5h16v14H4z"/>
@@ -39,6 +33,7 @@
         Noch keine Einträge.<br />
         Tippe unten rechts auf das Plus, um zu beginnen.
       </div>
+      <div id="entries-container"></div>
     </section>
 
     <!-- ============= Ansicht: Kalender ============= -->
@@ -82,6 +77,26 @@
         PIN, Export und Einstellungen<br />
         folgen in den nächsten Schritten.
       </div>
+    </section>
+
+    <!-- ============= Editor (Vollbild, überlagernd) ============= -->
+    <section id="view-editor" class="editor-view">
+      <header class="editor-header">
+        <button id="editor-back" class="icon-btn" aria-label="Zurück">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M15 18l-6-6 6-6"/>
+          </svg>
+        </button>
+        <div class="editor-date" id="editor-date"></div>
+        <div class="save-status" id="save-status"></div>
+      </header>
+      <textarea
+        id="editor-textarea"
+        placeholder="Schreib los…"
+        autocomplete="off"
+        autocorrect="on"
+        spellcheck="true"
+      ></textarea>
     </section>
 
     <!-- Floating Button: Neuer Eintrag -->
