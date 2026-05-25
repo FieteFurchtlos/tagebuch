@@ -53,15 +53,45 @@
 
     <!-- ============= Ansicht: Suche ============= -->
     <section id="view-search" class="view">
-      <div class="placeholder">
+      <div class="search-bar">
+        <span class="search-bar-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="7"/>
+            <path d="m20 20-3.5-3.5"/>
+          </svg>
+        </span>
+        <input
+          type="search"
+          id="search-input"
+          class="search-input"
+          placeholder="In Einträgen suchen…"
+          autocomplete="off"
+          autocorrect="off"
+          spellcheck="false"
+          enterkeyhint="search"
+        />
+        <button type="button" id="search-clear" class="search-clear" aria-label="Suche zurücksetzen" hidden>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 6l12 12M18 6L6 18"/>
+          </svg>
+        </button>
+      </div>
+
+      <div id="search-results"></div>
+
+      <div id="search-empty" class="placeholder search-state">
         <span class="icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="11" cy="11" r="7"/>
             <path d="m20 20-3.5-3.5"/>
           </svg>
         </span>
-        Volltextsuche<br />
-        wird gleich ergänzt.
+        Tippe einen Begriff ein,<br />
+        um deine Einträge zu durchsuchen.
+      </div>
+
+      <div id="search-no-match" class="placeholder search-state" hidden>
+        Keine Treffer.
       </div>
     </section>
 

@@ -1,6 +1,6 @@
 // Service Worker — Mein Tagebuch
 // Version bei jeder Änderung erhöhen, damit das Update auf dem Handy zieht.
-const CACHE_VERSION = 'tagebuch-v5';
+const CACHE_VERSION = 'tagebuch-v6';
 const APP_SHELL = [
   './',
   './index.html',

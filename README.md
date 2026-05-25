@@ -16,10 +16,11 @@ Einträge und Fotos bleiben **lokal auf dem Gerät** — kein Server.
 - Eintragen mit Auto-Save (alle 0,8 s nach der letzten Eingabe)
 - Lesbare Einträge-Liste mit Datum und Vorschau
 - Einträge bearbeiten, Datum/Uhrzeit ändern, löschen (mit Bestätigung)
+- Volltextsuche mit hervorgehobenen Treffern
 - Manueller Export und Import (JSON-Datei) — als Sicherung
 
 **Folgt in Phase 1:**
-Volltextsuche · Kalenderansicht · Google-Spracherkennung · Fotos · PIN-Sperre.
+Kalenderansicht · Google-Spracherkennung · Fotos · PIN-Sperre.
 
 **Folgt später:**
 Automatische pCloud-Sicherung (Phase 2).

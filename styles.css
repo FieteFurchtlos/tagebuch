@@ -454,3 +454,89 @@ body.editing .fab {
 body.editing .toast {
   bottom: calc(22px + env(safe-area-inset-bottom));
 }
+
+/* ---------- Suche ---------- */
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 4px 10px;
+  margin-bottom: 14px;
+  transition: border-color 0.15s ease;
+}
+.search-bar:focus-within {
+  border-color: var(--text-soft);
+}
+.search-bar-icon {
+  display: inline-flex;
+  color: var(--text-mute);
+  flex-shrink: 0;
+}
+.search-bar-icon svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 1.5;
+}
+.search-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--font);
+  font-size: 15px;
+  color: var(--text);
+  padding: 10px 4px;
+}
+.search-input::placeholder {
+  color: var(--text-mute);
+}
+/* Browser-eigenes Such-X im input[type=search] ausblenden, wir haben einen eigenen */
+.search-input::-webkit-search-cancel-button,
+.search-input::-webkit-search-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.search-clear {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: var(--text-mute);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  transition: color 0.15s ease, background 0.15s ease;
+  flex-shrink: 0;
+}
+.search-clear:active {
+  background: var(--border-soft);
+  color: var(--text);
+}
+.search-clear svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 1.75;
+}
+.search-clear[hidden] {
+  display: none;
+}
+
+/* Trefferzustände: kompaktere Platzhalter als die echten Leerzustände */
+.search-state {
+  padding: 48px 24px;
+}
+
+/* Hervorhebung in Suchergebnissen */
+.entry-preview mark {
+  background: var(--text);
+  color: var(--bg);
+  border-radius: 2px;
+  padding: 0 3px;
+  font-weight: 500;
+}

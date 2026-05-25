@@ -181,6 +181,13 @@ function switchView(target) {
   navButtons.forEach((b) =>
     b.classList.toggle('active', b.dataset.target === target)
   );
+  // Beim Wechsel in die Suche das Eingabefeld direkt fokussieren
+  if (target === 'search') {
+    setTimeout(() => {
+      const inp = document.getElementById('search-input');
+      if (inp) inp.focus();
+    }, 50);
+  }
 }
 
 navButtons.forEach((btn) => {
@@ -309,6 +316,10 @@ async function performCloseEditor() {
   editorView.classList.remove('active');
   document.body.classList.remove('editing');
   await renderEntriesList();
+  // Falls die Suche aktiv war: Treffer mit aktualisiertem Inhalt neu rendern
+  if (searchInput && searchInput.value.trim()) {
+    await performSearch(searchInput.value);
+  }
 }
 
 document.getElementById('editor-back').addEventListener('click', () => {
@@ -638,6 +649,108 @@ if (importBtn && importFileInput) {
       console.error(e);
       showToast(e.message || 'Import fehlgeschlagen.');
     }
+  });
+}
+
+// =====================================================
+// Volltextsuche
+// =====================================================
+const searchInput = document.getElementById('search-input');
+const searchClearBtn = document.getElementById('search-clear');
+const searchResultsEl = document.getElementById('search-results');
+const searchEmptyEl = document.getElementById('search-empty');
+const searchNoMatchEl = document.getElementById('search-no-match');
+
+const SEARCH_DEBOUNCE_MS = 150;
+const SNIPPET_CONTEXT = 60; // Zeichen vor und nach dem Treffer
+let searchDebounce = null;
+
+function escapeRegex(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+// Baut einen Treffer-Snippet mit <mark>-Hervorhebung.
+// Wichtig: erst HTML-escapen, dann nach dem ebenfalls escapten Query suchen —
+// so funktioniert die Hervorhebung auch bei Sonderzeichen wie < oder &.
+function buildSnippet(content, query) {
+  const lower = content.toLowerCase();
+  const q = query.toLowerCase();
+  const idx = lower.indexOf(q);
+  if (idx < 0) return escapeHtml(content.slice(0, 200));
+
+  const start = Math.max(0, idx - SNIPPET_CONTEXT);
+  const end = Math.min(content.length, idx + q.length + SNIPPET_CONTEXT);
+  const before = start > 0 ? '…' : '';
+  const after = end < content.length ? '…' : '';
+
+  const snippetEscaped = escapeHtml(content.slice(start, end));
+  const queryEscaped = escapeHtml(query);
+  const re = new RegExp('(' + escapeRegex(queryEscaped) + ')', 'gi');
+  const withMark = snippetEscaped.replace(re, '<mark>$1</mark>');
+
+  return before + withMark + after;
+}
+
+async function performSearch(rawQuery) {
+  const query = (rawQuery || '').trim();
+  searchClearBtn.hidden = query.length === 0;
+
+  if (!query) {
+    searchResultsEl.innerHTML = '';
+    searchEmptyEl.hidden = false;
+    searchNoMatchEl.hidden = true;
+    return;
+  }
+
+  searchEmptyEl.hidden = true;
+
+  const entries = await getAllEntries();
+  const q = query.toLowerCase();
+  const matches = entries.filter((e) =>
+    (e.content || '').toLowerCase().includes(q)
+  );
+  matches.sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+
+  if (matches.length === 0) {
+    searchResultsEl.innerHTML = '';
+    searchNoMatchEl.hidden = false;
+    return;
+  }
+
+  searchNoMatchEl.hidden = true;
+  searchResultsEl.innerHTML = '';
+
+  for (const entry of matches) {
+    const card = document.createElement('div');
+    card.className = 'entry-card';
+    const date = new Date(entry.createdAt);
+    const snippet = buildSnippet(entry.content || '', query);
+    card.innerHTML = `
+      <div class="entry-date">${escapeHtml(formatDateTime(date))}</div>
+      <div class="entry-preview">${snippet}</div>
+    `;
+    card.addEventListener('click', () => openEditor(entry.id));
+    searchResultsEl.appendChild(card);
+  }
+}
+
+if (searchInput) {
+  searchInput.addEventListener('input', () => {
+    if (searchDebounce) clearTimeout(searchDebounce);
+    searchDebounce = setTimeout(() => {
+      searchDebounce = null;
+      performSearch(searchInput.value);
+    }, SEARCH_DEBOUNCE_MS);
+  });
+}
+
+if (searchClearBtn) {
+  searchClearBtn.addEventListener('click', () => {
+    searchInput.value = '';
+    performSearch('');
+    searchInput.focus();
   });
 }
 
