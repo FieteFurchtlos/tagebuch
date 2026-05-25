@@ -1,6 +1,6 @@
 // Service Worker — Mein Tagebuch
 // Version bei jeder Änderung erhöhen, damit das Update auf dem Handy zieht.
-const CACHE_VERSION = 'tagebuch-v4';
+const CACHE_VERSION = 'tagebuch-v5';
 const APP_SHELL = [
   './',
   './index.html',
@@ -8,7 +8,8 @@ const APP_SHELL = [
   './app.js',
   './manifest.json',
   './icons/icon-192.png',
-  './icons/icon-512.png'
+  './icons/icon-512.png',
+  './icons/icon-maskable-512.png'
 ];
 
 self.addEventListener('install', (event) => {

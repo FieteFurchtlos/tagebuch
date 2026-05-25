@@ -141,6 +141,35 @@ function toLocalDatetimeInput(date) {
   );
 }
 
+// Dateinamens-Datum für Exporte
+function fileStamp(date) {
+  const pad = (n) => String(n).padStart(2, '0');
+  return (
+    date.getFullYear() + '-' +
+    pad(date.getMonth() + 1) + '-' +
+    pad(date.getDate())
+  );
+}
+
+// =====================================================
+// Toast — kurze Statusmeldung am unteren Rand
+// =====================================================
+let toastTimer = null;
+function showToast(message, durationMs = 2400) {
+  const toast = document.getElementById('toast');
+  if (!toast) return;
+  toast.textContent = message;
+  toast.hidden = false;
+  // Reflow erzwingen, damit die Transition greift
+  void toast.offsetWidth;
+  toast.classList.add('visible');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    toast.classList.remove('visible');
+    setTimeout(() => { toast.hidden = true; }, 250);
+  }, durationMs);
+}
+
 // =====================================================
 // Navigation zwischen Ansichten
 // =====================================================
@@ -346,8 +375,22 @@ const confirmOverlay = document.getElementById('confirm-overlay');
 const confirmOkBtn = document.getElementById('confirm-ok');
 const confirmCancelBtn = document.getElementById('confirm-cancel');
 
-function showConfirm() {
+function showConfirm({
+  title = 'Eintrag wirklich löschen?',
+  text = 'Dieser Schritt kann nicht rückgängig gemacht werden.',
+  okLabel = 'Löschen',
+  cancelLabel = 'Abbrechen',
+  danger = true,
+} = {}) {
   return new Promise((resolve) => {
+    const titleEl = document.getElementById('confirm-title');
+    const textEl = confirmOverlay.querySelector('.confirm-text');
+    titleEl.textContent = title;
+    textEl.textContent = text;
+    confirmOkBtn.textContent = okLabel;
+    confirmCancelBtn.textContent = cancelLabel;
+    confirmOkBtn.className = danger ? 'btn danger' : 'btn';
+
     confirmOverlay.hidden = false;
 
     const cleanup = (result) => {
@@ -371,7 +414,12 @@ function showConfirm() {
 
 editorDeleteBtn.addEventListener('click', async () => {
   if (!currentEntryId) return;
-  const ok = await showConfirm();
+  const ok = await showConfirm({
+    title: 'Eintrag wirklich löschen?',
+    text: 'Dieser Schritt kann nicht rückgängig gemacht werden.',
+    okLabel: 'Löschen',
+    danger: true,
+  });
   if (!ok) return;
 
   // Etwaige pending Saves verwerfen
@@ -455,6 +503,142 @@ async function renderEntriesList() {
     card.addEventListener('click', () => openEditor(entry.id));
     entriesContainer.appendChild(card);
   }
+}
+
+// =====================================================
+// Export & Import
+// =====================================================
+async function exportAllEntries() {
+  const entries = await getAllEntries();
+  // Aufsteigend nach Datum sortieren — macht die Datei lesbar
+  entries.sort(
+    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+  );
+
+  const payload = {
+    app: 'tagebuch',
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    entryCount: entries.length,
+    entries: entries,
+  };
+
+  const json = JSON.stringify(payload, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+
+  const filename = `tagebuch_${fileStamp(new Date())}.json`;
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+
+  return entries.length;
+}
+
+async function importEntriesFromFile(file) {
+  const text = await file.text();
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch (e) {
+    throw new Error('Datei ist kein gültiges JSON.');
+  }
+
+  if (!data || data.app !== 'tagebuch' || !Array.isArray(data.entries)) {
+    throw new Error('Datei stammt nicht aus dieser App.');
+  }
+
+  let imported = 0;
+  for (const entry of data.entries) {
+    // ID weglassen, damit IndexedDB neue IDs vergibt (keine Kollisionen)
+    const copy = { ...entry };
+    delete copy.id;
+    if (!copy.createdAt) copy.createdAt = new Date().toISOString();
+    if (!copy.updatedAt) copy.updatedAt = copy.createdAt;
+    if (typeof copy.content !== 'string') copy.content = '';
+    if (!Array.isArray(copy.photos)) copy.photos = [];
+    await addEntry(copy);
+    imported++;
+  }
+
+  return imported;
+}
+
+// =====================================================
+// Settings — Export- und Import-Buttons
+// =====================================================
+const exportBtn = document.getElementById('action-export');
+const importBtn = document.getElementById('action-import');
+const importFileInput = document.getElementById('import-file-input');
+
+if (exportBtn) {
+  exportBtn.addEventListener('click', async () => {
+    try {
+      const count = await exportAllEntries();
+      if (count === 0) {
+        showToast('Noch keine Einträge zum Sichern.');
+      } else {
+        showToast(
+          `${count} ${count === 1 ? 'Eintrag' : 'Einträge'} exportiert.`
+        );
+      }
+    } catch (e) {
+      console.error(e);
+      showToast('Export fehlgeschlagen.');
+    }
+  });
+}
+
+if (importBtn && importFileInput) {
+  importBtn.addEventListener('click', () => {
+    importFileInput.value = ''; // dieselbe Datei darf erneut gewählt werden
+    importFileInput.click();
+  });
+
+  importFileInput.addEventListener('change', async () => {
+    const file = importFileInput.files && importFileInput.files[0];
+    if (!file) return;
+
+    // Vorher zählen, damit der Dialog die Anzahl nennen kann
+    let preview;
+    try {
+      const text = await file.text();
+      preview = JSON.parse(text);
+    } catch (e) {
+      showToast('Datei ist kein gültiges JSON.');
+      return;
+    }
+    if (!preview || preview.app !== 'tagebuch' || !Array.isArray(preview.entries)) {
+      showToast('Datei stammt nicht aus dieser App.');
+      return;
+    }
+
+    const count = preview.entries.length;
+    const ok = await showConfirm({
+      title: `${count} ${count === 1 ? 'Eintrag' : 'Einträge'} importieren?`,
+      text:
+        'Vorhandene Einträge bleiben erhalten — die Sicherung wird zusätzlich eingespielt.',
+      okLabel: 'Importieren',
+      danger: false,
+    });
+    if (!ok) return;
+
+    try {
+      const imported = await importEntriesFromFile(file);
+      showToast(
+        `${imported} ${imported === 1 ? 'Eintrag' : 'Einträge'} importiert.`
+      );
+      await renderEntriesList();
+    } catch (e) {
+      console.error(e);
+      showToast(e.message || 'Import fehlgeschlagen.');
+    }
+  });
 }
 
 // =====================================================

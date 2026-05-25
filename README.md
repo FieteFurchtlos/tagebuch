@@ -7,16 +7,22 @@ Einträge und Fotos bleiben **lokal auf dem Gerät** — kein Server.
 
 ## Was Phase 1 enthält
 
-Aktuell steht das **Grundgerüst**:
+**Bereits aktiv:**
 
 - Installierbare PWA (Homescreen-Icon, läuft im Vollbild)
 - Offline-Fähigkeit (Service Worker)
-- Warmer Tagebuch-Look (Cremepapier, Sepia-Schrift, Sienna-Akzent)
+- Minimalistisches Design (Off-White, Anthrazit, klare Linien-Icons, Aptos)
 - Navigation: Einträge · Kalender · Suche · Mehr
-- Floating-Action-Button für neuen Eintrag
+- Eintragen mit Auto-Save (alle 0,8 s nach der letzten Eingabe)
+- Lesbare Einträge-Liste mit Datum und Vorschau
+- Einträge bearbeiten, Datum/Uhrzeit ändern, löschen (mit Bestätigung)
+- Manueller Export und Import (JSON-Datei) — als Sicherung
 
-**Noch nicht aktiv** (kommt schrittweise nach deiner Freigabe):
-PIN-Sperre · Eintragen mit Auto-Save · Google-Spracherkennung · Fotos · Suche · Kalenderlogik · Export. 
+**Folgt in Phase 1:**
+Volltextsuche · Kalenderansicht · Google-Spracherkennung · Fotos · PIN-Sperre.
+
+**Folgt später:**
+Automatische pCloud-Sicherung (Phase 2).
 
 ---
 

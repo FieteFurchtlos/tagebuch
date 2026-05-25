@@ -67,15 +67,55 @@
 
     <!-- ============= Ansicht: Einstellungen ============= -->
     <section id="view-settings" class="view">
-      <div class="placeholder">
-        <span class="icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="3"/>
-            <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h0a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5h0a1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v0a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>
-          </svg>
-        </span>
-        PIN, Export und Einstellungen<br />
-        folgen in den nächsten Schritten.
+      <div class="settings-section">
+        <h2 class="settings-heading">Daten</h2>
+        <p class="settings-hint">
+          Deine Einträge bleiben lokal auf diesem Gerät. Sichere sie regelmäßig
+          auf deinem Rechner oder in der Cloud.
+        </p>
+
+        <button type="button" class="settings-row" id="action-export">
+          <span class="settings-row-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <path d="M7 10l5 5 5-5"/>
+              <path d="M12 15V3"/>
+            </svg>
+          </span>
+          <span class="settings-row-text">
+            <span class="settings-row-title">Einträge exportieren</span>
+            <span class="settings-row-sub">Alle Einträge als JSON-Datei sichern</span>
+          </span>
+        </button>
+
+        <button type="button" class="settings-row" id="action-import">
+          <span class="settings-row-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <path d="M17 8l-5-5-5 5"/>
+              <path d="M12 3v12"/>
+            </svg>
+          </span>
+          <span class="settings-row-text">
+            <span class="settings-row-title">Einträge importieren</span>
+            <span class="settings-row-sub">Aus einer früheren Sicherung wiederherstellen</span>
+          </span>
+        </button>
+
+        <input
+          type="file"
+          id="import-file-input"
+          class="hidden-file-input"
+          accept=".json,application/json"
+        />
+      </div>
+
+      <div class="settings-section">
+        <h2 class="settings-heading">Über</h2>
+        <p class="settings-hint">
+          Mein Tagebuch · Phase 1<br />
+          Alle Daten bleiben lokal auf deinem Gerät — keine Cloud, kein Server.
+        </p>
       </div>
     </section>
 
@@ -120,6 +160,9 @@
         </div>
       </div>
     </div>
+
+    <!-- ============= Toast (kurze Statusmeldung) ============= -->
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
     <!-- Floating Button: Neuer Eintrag -->
     <button id="fab-new" class="fab" aria-label="Neuer Eintrag">
