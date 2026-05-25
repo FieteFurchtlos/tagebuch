@@ -110,10 +110,35 @@ function formatDateTime(date) {
   );
 }
 
+// Kompakte Variante für den Editor-Header
+function formatDateTimeCompact(date) {
+  return (
+    date.toLocaleDateString('de-DE', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    }) +
+    ' · ' +
+    date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+  );
+}
+
 function escapeHtml(str) {
   const div = document.createElement('div');
   div.textContent = str;
   return div.innerHTML;
+}
+
+// Wandelt ein Date-Objekt in den Wert, den <input type="datetime-local"> erwartet
+function toLocalDatetimeInput(date) {
+  const pad = (n) => String(n).padStart(2, '0');
+  return (
+    date.getFullYear() + '-' +
+    pad(date.getMonth() + 1) + '-' +
+    pad(date.getDate()) + 'T' +
+    pad(date.getHours()) + ':' +
+    pad(date.getMinutes())
+  );
 }
 
 // =====================================================
@@ -143,7 +168,27 @@ let initialOpenDate = null;
 const editorView = document.getElementById('view-editor');
 const editorTextarea = document.getElementById('editor-textarea');
 const editorDateEl = document.getElementById('editor-date');
+const editorDateInput = document.getElementById('editor-date-input');
+const editorDeleteBtn = document.getElementById('editor-delete');
 const saveStatusEl = document.getElementById('save-status');
+
+// Aktuelles "createdAt" des im Editor offenen Eintrags (auch vor erstem Save)
+let editorCurrentDate = null;
+
+function refreshEditorDateDisplay() {
+  if (!editorCurrentDate) return;
+  editorDateEl.textContent = formatDateTimeCompact(editorCurrentDate);
+  editorDateInput.value = toLocalDatetimeInput(editorCurrentDate);
+}
+
+function refreshDeleteVisibility() {
+  // Lösch-Knopf nur zeigen, wenn der Eintrag bereits in der DB existiert
+  if (currentEntryId) {
+    editorDeleteBtn.hidden = false;
+  } else {
+    editorDeleteBtn.hidden = true;
+  }
+}
 
 async function openEditor(entryId = null) {
   if (entryId) {
@@ -151,14 +196,17 @@ async function openEditor(entryId = null) {
     if (!entry) return;
     currentEntryId = entryId;
     editorTextarea.value = entry.content || '';
-    editorDateEl.textContent = formatDateTime(new Date(entry.createdAt));
+    editorCurrentDate = new Date(entry.createdAt);
     initialOpenDate = new Date(entry.createdAt);
   } else {
     currentEntryId = null; // wird beim ersten Speichern erzeugt
     editorTextarea.value = '';
-    initialOpenDate = new Date();
-    editorDateEl.textContent = formatDateTime(initialOpenDate);
+    editorCurrentDate = new Date();
+    initialOpenDate = editorCurrentDate;
   }
+
+  refreshEditorDateDisplay();
+  refreshDeleteVisibility();
 
   saveStatusEl.textContent = '';
   editorView.classList.add('active');
@@ -182,13 +230,14 @@ async function performSave() {
       saveStatusEl.textContent = '';
       return;
     }
-    const nowIso = initialOpenDate.toISOString();
+    const createdIso = (editorCurrentDate || new Date()).toISOString();
     currentEntryId = await addEntry({
-      createdAt: nowIso,
+      createdAt: createdIso,
       updatedAt: new Date().toISOString(),
       content,
       photos: [],
     });
+    refreshDeleteVisibility();
   } else {
     const entry = await getEntry(currentEntryId);
     if (!entry) return;
@@ -245,6 +294,110 @@ window.addEventListener('popstate', () => {
 });
 
 document.getElementById('fab-new').addEventListener('click', () => openEditor());
+
+// =====================================================
+// Datum eines Eintrags ändern (Tippen auf das Datum)
+// =====================================================
+editorDateEl.addEventListener('click', () => {
+  if (!editorCurrentDate) return;
+  editorDateInput.value = toLocalDatetimeInput(editorCurrentDate);
+  // showPicker() ist der moderne Weg; älteres Android fällt auf focus/click zurück
+  if (typeof editorDateInput.showPicker === 'function') {
+    try {
+      editorDateInput.showPicker();
+      return;
+    } catch (e) {
+      /* Fallback unten */
+    }
+  }
+  editorDateInput.focus();
+  editorDateInput.click();
+});
+
+editorDateInput.addEventListener('change', async () => {
+  const value = editorDateInput.value;
+  if (!value) return;
+  // datetime-local wird als lokale Zeit interpretiert
+  const newDate = new Date(value);
+  if (isNaN(newDate.getTime())) return;
+
+  editorCurrentDate = newDate;
+  editorDateEl.textContent = formatDateTimeCompact(newDate);
+
+  // Wenn schon ein Eintrag existiert: createdAt direkt aktualisieren
+  if (currentEntryId) {
+    const entry = await getEntry(currentEntryId);
+    if (entry) {
+      entry.createdAt = newDate.toISOString();
+      entry.updatedAt = new Date().toISOString();
+      await updateEntry(entry);
+      saveStatusEl.textContent = 'Gespeichert';
+    }
+  } else {
+    // Noch kein Eintrag — beim ersten Save wird editorCurrentDate verwendet
+    initialOpenDate = newDate;
+  }
+});
+
+// =====================================================
+// Eintrag löschen — mit Bestätigung
+// =====================================================
+const confirmOverlay = document.getElementById('confirm-overlay');
+const confirmOkBtn = document.getElementById('confirm-ok');
+const confirmCancelBtn = document.getElementById('confirm-cancel');
+
+function showConfirm() {
+  return new Promise((resolve) => {
+    confirmOverlay.hidden = false;
+
+    const cleanup = (result) => {
+      confirmOverlay.hidden = true;
+      confirmOkBtn.removeEventListener('click', onOk);
+      confirmCancelBtn.removeEventListener('click', onCancel);
+      confirmOverlay.removeEventListener('click', onBackdrop);
+      resolve(result);
+    };
+    const onOk = () => cleanup(true);
+    const onCancel = () => cleanup(false);
+    const onBackdrop = (e) => {
+      if (e.target === confirmOverlay) cleanup(false);
+    };
+
+    confirmOkBtn.addEventListener('click', onOk);
+    confirmCancelBtn.addEventListener('click', onCancel);
+    confirmOverlay.addEventListener('click', onBackdrop);
+  });
+}
+
+editorDeleteBtn.addEventListener('click', async () => {
+  if (!currentEntryId) return;
+  const ok = await showConfirm();
+  if (!ok) return;
+
+  // Etwaige pending Saves verwerfen
+  if (saveTimer) {
+    clearTimeout(saveTimer);
+    saveTimer = null;
+  }
+
+  await deleteEntry(currentEntryId);
+  currentEntryId = null;
+  editorCurrentDate = null;
+  initialOpenDate = null;
+
+  // Editor schließen ohne erneutes Speichern
+  // Vor dem performCloseEditor() den Inhalt leeren, damit kein neuer Eintrag entsteht
+  editorTextarea.value = '';
+  editorView.classList.remove('active');
+  document.body.classList.remove('editing');
+
+  // History-State zurücksetzen, falls noch der Editor-Eintrag drin ist
+  if (history.state && history.state.editor) {
+    history.back();
+  }
+
+  await renderEntriesList();
+});
 
 // Vor dem Schließen/Reload nochmal sichern (Auto-Save bei Unterbrechung)
 window.addEventListener('beforeunload', () => {
